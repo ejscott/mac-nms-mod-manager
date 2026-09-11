@@ -16,6 +16,7 @@ The manager backs up the original executable, handles code signing, detects game
 - ARM64 Mach-O slice parsing, masked byte-pattern discovery, fingerprints, and patch-state validation
 - Known patched-state validation for the verified 4.70 prototype
 - Transactional backup/restore and code-signing service
+- Guided macOS App Management permission setup with a direct System Settings shortcut and reversible access check
 - HGPAK install, enable, disable, and uninstall model
 - Reversible mod toggles that retain disabled archives and their metadata outside the game's active `MODS` folder
 - Compatibility analysis that reads Mac HGPAK manifests, flags shared virtual asset paths, and distinguishes active from potential conflicts
@@ -71,6 +72,10 @@ To create a signed app and xattr-free distributable ZIP in `outputs/`, run `scri
 The default game location is:
 
 `~/Library/Application Support/Steam/steamapps/common/No Man's Sky/No Man's Sky.app`
+
+### First-run permission
+
+macOS may prevent the manager from changing files inside `No Man's Sky.app`. If prompted, open **System Settings → Privacy & Security → App Management**, allow **Mac NMS Mod Manager**, then return to the Dashboard and click **Check Access**. The app includes a shortcut to this Settings page and will show the same guided setup automatically when a permission-related operation fails. Full Disk Access is not normally required.
 
 Runtime state is stored under `~/Library/Application Support/Mac NMS Mod Manager/`. Backups are kept outside the game bundle so Steam updates cannot silently replace them.
 

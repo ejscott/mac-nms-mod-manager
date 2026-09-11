@@ -45,5 +45,9 @@ struct ContentView: View {
             get: { model.errorMessage != nil },
             set: { if !$0 { model.errorMessage = nil } }
         )) { Button("OK") { model.errorMessage = nil } } message: { Text(model.errorMessage ?? "") }
+        .sheet(isPresented: $model.showPermissionSetup) {
+            PermissionSetupView()
+                .environmentObject(model)
+        }
     }
 }

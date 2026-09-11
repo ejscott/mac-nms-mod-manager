@@ -39,6 +39,29 @@ struct DashboardView: View {
                         }
                     }.frame(maxWidth: .infinity, alignment: .leading).padding(6)
                 }
+                GroupBox("macOS permission") {
+                    HStack(spacing: 14) {
+                        Image(systemName: accessSymbol)
+                            .font(.title2)
+                            .foregroundStyle(accessTint)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(accessTitle).font(.headline)
+                            Text(model.gameAccess.details).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button("Open App Management", action: model.openAppManagementSettings)
+                        if model.gameAccess.status == .needsPermission {
+                            Button("Check Access", action: model.checkGameAccess)
+                                .buttonStyle(.borderedProminent)
+                                .disabled(model.installation == nil || model.isWorking)
+                        } else {
+                            Button("Check Access", action: model.checkGameAccess)
+                                .disabled(model.installation == nil || model.isWorking)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(6)
+                }
                 GroupBox("How loading works") {
                     Text("Mac HGPAK mods are mounted from MACOSBANKS/MODS first. The game then mounts stock MACOSBANKS normally, so stock archives remain untouched and matching mod assets take precedence.")
                         .frame(maxWidth: .infinity, alignment: .leading).padding(6)
@@ -66,6 +89,16 @@ struct DashboardView: View {
     }
     private var healthSymbol: String { model.inspection.health == .patched ? "checkmark.seal.fill" : "exclamationmark.triangle.fill" }
     private var healthTint: Color { model.inspection.health == .patched ? .green : .orange }
+    private var accessTitle: String {
+        switch model.gameAccess.status {
+        case .ready: "Game access ready"
+        case .needsPermission: "Permission required"
+        case .unavailable: "Game access unavailable"
+        case .notChecked: "Checking game access"
+        }
+    }
+    private var accessSymbol: String { model.gameAccess.status == .ready ? "lock.open.fill" : "lock.trianglebadge.exclamationmark.fill" }
+    private var accessTint: Color { model.gameAccess.status == .ready ? .green : .orange }
 }
 
 private struct StatusCard: View {

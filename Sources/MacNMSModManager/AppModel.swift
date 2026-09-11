@@ -11,10 +11,13 @@ final class AppModel: ObservableObject {
     @Published var compatibilityCheck: CompatibilityCheckResult?
     @Published var isWorking = false
     @Published var selectedTab: SidebarItem = .dashboard
+    @Published var gameAccess = GameAccessInspection(status: .notChecked, details: "Checking game access…")
+    @Published var showPermissionSetup = false
 
     let directories = AppDirectories()
     private lazy var registry = RegistryStore(url: directories.registryURL)
     private let patcher = ExecutablePatcher()
+    private let accessInspector = GameAccessInspector()
 
     func refresh() async {
         isWorking = true
@@ -23,10 +26,21 @@ final class AppModel: ObservableObject {
             let state = await registry.snapshot()
             let location = try GameLocator().locate(appURL: state.gameAppURL ?? GameLocator.defaultAppURL)
             installation = location
+            gameAccess = accessInspector.inspect(location)
             inspection = patcher.inspect(executableURL: location.executableURL, previousFingerprint: state.lastSeenFingerprint)
-            let installer = ModInstaller(installation: location, directories: directories, registry: registry)
-            _ = try await installer.reconcileUntrackedArchives()
-            _ = try await installer.refreshCompatibilityMetadata()
+            if gameAccess.status == .ready {
+                do {
+                    let installer = ModInstaller(installation: location, directories: directories, registry: registry)
+                    _ = try await installer.reconcileUntrackedArchives()
+                    _ = try await installer.refreshCompatibilityMetadata()
+                } catch {
+                    if isPermissionError(error) {
+                        markPermissionRequired()
+                    } else {
+                        throw error
+                    }
+                }
+            }
             let refreshedState = await registry.snapshot()
             mods = refreshedState.mods.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             if inspection.health == .patched || inspection.health == .readyToPatch {
@@ -34,6 +48,7 @@ final class AppModel: ObservableObject {
             }
         } catch {
             installation = nil
+            gameAccess = GameAccessInspection(status: .unavailable, details: error.localizedDescription)
             inspection = PatchInspection(health: .invalid, details: error.localizedDescription)
         }
     }
@@ -52,7 +67,7 @@ final class AppModel: ObservableObject {
                 state.gameAppURL = url
                 try await registry.replace(with: state)
                 await refresh()
-            } catch { errorMessage = error.localizedDescription }
+            } catch { present(error) }
         }
     }
 
@@ -80,7 +95,7 @@ final class AppModel: ObservableObject {
                 let installer = ModInstaller(installation: installation, directories: directories, registry: registry)
                 _ = try await installer.installHGPAK(from: url)
                 await refresh()
-            } catch { errorMessage = error.localizedDescription }
+            } catch { present(error) }
         }
     }
 
@@ -99,9 +114,7 @@ final class AppModel: ObservableObject {
                 inspection: inspection,
                 matches: ModCompatibilityAnalyzer.matches(paths: inspection.assetPaths, against: mods)
             )
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        } catch { present(error) }
     }
 
     func applyPatch() {
@@ -119,7 +132,7 @@ final class AppModel: ObservableObject {
                 state.lastSeenFingerprint = receipt.after
                 try await registry.replace(with: state)
                 await refresh()
-            } catch { errorMessage = error.localizedDescription }
+            } catch { present(error) }
         }
     }
 
@@ -129,7 +142,7 @@ final class AppModel: ObservableObject {
             do {
                 try await ModInstaller(installation: installation, directories: directories, registry: registry).setEnabled(enabled, id: mod.id)
                 await refresh()
-            } catch { errorMessage = error.localizedDescription }
+            } catch { present(error) }
         }
     }
 
@@ -139,8 +152,77 @@ final class AppModel: ObservableObject {
             do {
                 try await ModInstaller(installation: installation, directories: directories, registry: registry).uninstall(id: mod.id)
                 await refresh()
-            } catch { errorMessage = error.localizedDescription }
+            } catch { present(error) }
         }
+    }
+
+    func openAppManagementSettings() {
+        let destinations = [
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_AppBundles",
+            "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_AppBundles",
+            "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension"
+        ]
+        for destination in destinations {
+            if let url = URL(string: destination), NSWorkspace.shared.open(url) { return }
+        }
+        errorMessage = "Open System Settings → Privacy & Security → App Management, then allow Mac NMS Mod Manager."
+    }
+
+    func revealThisApp() {
+        NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+    }
+
+    func checkGameAccess() {
+        guard let installation else { return }
+        Task {
+            isWorking = true
+            defer { isWorking = false }
+            do {
+                try accessInspector.verifyWriteAccess(installation)
+                gameAccess = GameAccessInspection(
+                    status: .ready,
+                    details: "Permission confirmed. The manager can update the game and install mods."
+                )
+                showPermissionSetup = false
+                await refresh()
+            } catch {
+                markPermissionRequired()
+            }
+        }
+    }
+
+    private func present(_ error: Error) {
+        if isPermissionError(error) {
+            markPermissionRequired()
+        } else {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func markPermissionRequired() {
+        gameAccess = GameAccessInspection(
+            status: .needsPermission,
+            details: "Allow this manager in Privacy & Security → App Management, then check access again."
+        )
+        showPermissionSetup = true
+    }
+
+    private func isPermissionError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        if nsError.domain == NSCocoaErrorDomain,
+           [NSFileWriteNoPermissionError, NSFileReadNoPermissionError].contains(nsError.code) {
+            return true
+        }
+        if nsError.domain == NSPOSIXErrorDomain,
+           [Int(EACCES), Int(EPERM)].contains(nsError.code) {
+            return true
+        }
+        if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error,
+           isPermissionError(underlying) {
+            return true
+        }
+        let description = nsError.localizedDescription.lowercased()
+        return description.contains("operation not permitted") || description.contains("permission denied")
     }
 }
 
