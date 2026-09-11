@@ -15,3 +15,8 @@ import Testing
     try Data("PSAR".utf8).write(to: url)
     #expect(ModInputClassifier.classify(url) == .windowsPAK)
 }
+
+@Test func recognizesAMUMSSLuaScript() {
+    let url = URL(fileURLWithPath: "/tmp/example.lua")
+    #expect(ModInputClassifier.classify(url) == .amumssLua)
+}

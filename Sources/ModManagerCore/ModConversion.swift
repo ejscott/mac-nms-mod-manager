@@ -3,6 +3,7 @@ import Foundation
 public enum ModInputKind: String, Codable, Sendable {
     case macHGPAK
     case windowsPAK
+    case amumssLua
     case sparseEXMLOrMBIN
     case unknown
 }
@@ -55,6 +56,7 @@ public enum ModInputClassifier {
             return extensionName == "hgpak" ? .unknown : .windowsPAK
         }
         if ["exml", "mbin", "mxml"].contains(extensionName) { return .sparseEXMLOrMBIN }
+        if extensionName == "lua" { return .amumssLua }
         return .unknown
     }
 }

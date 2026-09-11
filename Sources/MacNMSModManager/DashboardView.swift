@@ -13,6 +13,7 @@ struct DashboardView: View {
                     StatusCard(title: "Game", value: model.installation == nil ? "Not found" : "Found", symbol: "gamecontroller")
                     StatusCard(title: "Mod loader", value: healthLabel, symbol: healthSymbol, tint: healthTint)
                     StatusCard(title: "Active mods", value: "\(model.mods.filter(\.enabled).count)", symbol: "shippingbox.fill")
+                    StatusCard(title: "Active conflicts", value: "\(ModCompatibilityAnalyzer.activeConflictCount(in: model.mods))", symbol: "exclamationmark.triangle.fill", tint: ModCompatibilityAnalyzer.activeConflictCount(in: model.mods) == 0 ? .green : .orange)
                 }
                 GroupBox("Executable status") {
                     VStack(alignment: .leading, spacing: 12) {

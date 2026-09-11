@@ -14,6 +14,8 @@ The manager backs up the original executable, handles code signing, detects game
 - Transactional backup/restore and code-signing service
 - HGPAK install, enable, disable, and uninstall model
 - Reversible mod toggles that retain disabled archives and their metadata outside the game's active `MODS` folder
+- Compatibility analysis that reads Mac HGPAK manifests, flags shared virtual asset paths, and distinguishes active from potential conflicts
+- Preflight checks for AMUMSS Lua scripts using their declared MBIN targets, with warnings when scripts build paths dynamically
 - JSON registry with mod metadata and game-build/patch receipts
 - Conversion-provider boundary for future Windows `.pak` and sparse EXML/MBIN support
 - Unit tests for pattern matching, Mach-O parsing, and registry behavior

@@ -41,9 +41,16 @@ public actor ModInstaller {
         }
         let staged = directories.stagingURL.appendingPathComponent("mod-\(UUID().uuidString)-\(filename)")
         try FileManager.default.copyItem(at: source, to: staged)
+        let inspection: ModAssetInspection
+        do {
+            inspection = try ModAssetInspector.inspectMacHGPAK(staged)
+        } catch {
+            try? FileManager.default.removeItem(at: staged)
+            throw error
+        }
         try FileManager.default.moveItem(at: staged, to: destination)
         let hash = MachOReader.sha256(try Data(contentsOf: destination, options: .mappedIfSafe))
-        let record = ModRecord(name: name ?? source.deletingPathExtension().lastPathComponent, author: author, version: version, sourceURL: source, managedFilename: filename, sha256: hash)
+        let record = ModRecord(name: name ?? source.deletingPathExtension().lastPathComponent, author: author, version: version, sourceURL: source, managedFilename: filename, sha256: hash, assetPaths: inspection.assetPaths)
         try await registry.upsert(record)
         return record
     }
@@ -58,13 +65,32 @@ public actor ModInstaller {
         var additions: [ModRecord] = []
         for file in files where !tracked.contains(file.lastPathComponent.lowercased()) && ModInputClassifier.classify(file) == .macHGPAK {
             let hash = MachOReader.sha256(try Data(contentsOf: file, options: .mappedIfSafe))
-            additions.append(ModRecord(name: file.deletingPathExtension().lastPathComponent, sourceURL: nil, managedFilename: file.lastPathComponent, sha256: hash))
+            let paths = try? ModAssetInspector.inspectMacHGPAK(file).assetPaths
+            additions.append(ModRecord(name: file.deletingPathExtension().lastPathComponent, sourceURL: nil, managedFilename: file.lastPathComponent, sha256: hash, assetPaths: paths))
         }
         if !additions.isEmpty {
             snapshot.mods.append(contentsOf: additions)
             try await registry.replace(with: snapshot)
         }
         return additions
+    }
+
+    @discardableResult
+    public func refreshCompatibilityMetadata() async throws -> Int {
+        var snapshot = await registry.snapshot()
+        var updated = 0
+        for index in snapshot.mods.indices where snapshot.mods[index].assetPaths == nil {
+            let record = snapshot.mods[index]
+            let directory = record.enabled ? installation.modsURL : directories.disabledModsURL
+            let archive = directory.appendingPathComponent(record.managedFilename)
+            guard FileManager.default.fileExists(atPath: archive.path),
+                  let paths = try? ModAssetInspector.inspectMacHGPAK(archive).assetPaths else { continue }
+            snapshot.mods[index].assetPaths = paths
+            snapshot.mods[index].updatedAt = .now
+            updated += 1
+        }
+        if updated > 0 { try await registry.replace(with: snapshot) }
+        return updated
     }
 
     public func setEnabled(_ enabled: Bool, id: UUID) async throws {

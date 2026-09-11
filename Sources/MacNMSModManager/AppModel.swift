@@ -8,6 +8,7 @@ final class AppModel: ObservableObject {
     @Published var inspection = PatchInspection(health: .notInspected, details: "Looking for No Man's Sky…")
     @Published var mods: [ModRecord] = []
     @Published var errorMessage: String?
+    @Published var compatibilityCheck: CompatibilityCheckResult?
     @Published var isWorking = false
     @Published var selectedTab: SidebarItem = .dashboard
 
@@ -25,6 +26,7 @@ final class AppModel: ObservableObject {
             inspection = patcher.inspect(executableURL: location.executableURL, previousFingerprint: state.lastSeenFingerprint)
             let installer = ModInstaller(installation: location, directories: directories, registry: registry)
             _ = try await installer.reconcileUntrackedArchives()
+            _ = try await installer.refreshCompatibilityMetadata()
             let refreshedState = await registry.snapshot()
             mods = refreshedState.mods.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             if inspection.health == .patched || inspection.health == .readyToPatch {
@@ -82,6 +84,26 @@ final class AppModel: ObservableObject {
         }
     }
 
+    func chooseAndCheckCompatibility() {
+        let panel = NSOpenPanel()
+        panel.title = "Choose a Mac mod or AMUMSS Lua script"
+        panel.prompt = "Check"
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            let inspection = try ModAssetInspector.inspect(url)
+            compatibilityCheck = CompatibilityCheckResult(
+                filename: url.lastPathComponent,
+                inspection: inspection,
+                matches: ModCompatibilityAnalyzer.matches(paths: inspection.assetPaths, against: mods)
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func applyPatch() {
         guard let installation,
               inspection.health == .readyToPatch,
@@ -120,6 +142,13 @@ final class AppModel: ObservableObject {
             } catch { errorMessage = error.localizedDescription }
         }
     }
+}
+
+struct CompatibilityCheckResult: Identifiable {
+    let id = UUID()
+    var filename: String
+    var inspection: ModAssetInspection
+    var matches: [ModCompatibilityMatch]
 }
 
 enum SidebarItem: String, CaseIterable, Identifiable {

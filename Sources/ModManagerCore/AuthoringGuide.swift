@@ -34,6 +34,12 @@ public enum AuthoringGuide {
 
     When two mods edit the same MBIN, their changes must be merged before compilation. Archive order alone cannot safely combine two complete replacements of the same virtual file.
 
+    ## Compatibility checker and Lua scripts
+
+    The manager reads the internal file list from Mac HGPAK archives and warns when installed mods replace the same virtual path. An **active conflict** means both overlapping mods are enabled. A **potential conflict** means at least one is disabled.
+
+    AMUMSS `.lua` files are build recipes, not files the game can load. The checker can scan their declared `.MBIN` targets to predict overlap before conversion. This is conservative: Lua can construct paths dynamically, and two scripts targeting the same MBIN may still be mergeable if they edit different values. Use an AMUMSS-aware merge against the current vanilla asset to resolve those cases.
+
     ## Compatibility checklist
 
     - Built from the same No Man's Sky update as the player's Mac game

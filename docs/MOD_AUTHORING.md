@@ -49,6 +49,19 @@ Game updates can change asset paths and MBIN layouts without changing a mod's vi
 | Sparse EXML/MXML edits | Merge the edits into a full current Mac vanilla MXML, compile to MBIN, then package |
 | AMUMSS Lua script | Run the script against matching current assets, inspect the generated files, then follow the appropriate archive/MBIN workflow |
 
+## Using the compatibility checker
+
+The manager's **Check Compatibility** action accepts either a Mac HGPAK archive or an AMUMSS `.lua` script.
+
+For a Mac archive, it reads the embedded manifest and compares every virtual game path with the paths recorded for installed mods. An **active conflict** means both mods are enabled; a **potential conflict** means an overlapping mod is currently disabled. Installed mods are analyzed automatically, including archives that were already present before this feature was added.
+
+For Lua, the checker extracts statically declared `.MBIN` paths such as those in `MBIN_FILE_SOURCE`. This is useful before conversion, but it has two limits:
+
+- Lua scripts are recipes for producing a mod and cannot be loaded by the game directly.
+- Scripts can generate paths and edit tables dynamically, so static scanning may be incomplete. Two scripts that target the same MBIN can sometimes be safely merged by applying both transformations to the current vanilla MXML; two separately compiled replacement MBINs cannot merge at runtime.
+
+A shared path is therefore a conservative warning, not proof that the authors' intended changes are logically incompatible. Inspect or merge the underlying edits when both mods are required.
+
 ## Workflow A: create a native Mac mod
 
 ### 1. Identify the virtual asset path
@@ -239,5 +252,6 @@ Re-extract the current Mac vanilla asset and rebuild the mod. For MBIN changes, 
 ## Related tools and acknowledgements
 
 - [nms-mod-installer-macos](https://github.com/Enki013/nms-mod-installer-macos) by Enki013 inspired this project and documents the Mac HGPAK/LZ4 pipeline.
+- [AMUMSS](https://www.nexusmods.com/nomanssky/mods/957) by Mjjstral/MetaIdea and Wbertro/TheBossBoy provides the Lua mod-definition and merge workflow used by many No Man's Sky mods. Its Lua files are valuable conversion recipes, but AMUMSS is a script processor rather than a runtime mod manager.
 - [HGPAKtool](https://github.com/monkeyman192/HGPAKtool) reads modern No Man's Sky archives and provides extraction tooling; review its current repacking limitations.
 - [MBINCompiler](https://github.com/monkeyman192/MBINCompiler) handles MBIN and EXML/MXML conversion and must match the current game schema.

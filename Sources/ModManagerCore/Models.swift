@@ -57,11 +57,12 @@ public struct ModRecord: Codable, Identifiable, Equatable, Sendable {
     public var sourceURL: URL?
     public var managedFilename: String
     public var sha256: String
+    public var assetPaths: [String]?
     public var enabled: Bool
     public var installedAt: Date
     public var updatedAt: Date
 
-    public init(id: UUID = UUID(), name: String, author: String? = nil, version: String? = nil, summary: String? = nil, sourceURL: URL? = nil, managedFilename: String, sha256: String, enabled: Bool = true, installedAt: Date = .now, updatedAt: Date = .now) {
+    public init(id: UUID = UUID(), name: String, author: String? = nil, version: String? = nil, summary: String? = nil, sourceURL: URL? = nil, managedFilename: String, sha256: String, assetPaths: [String]? = nil, enabled: Bool = true, installedAt: Date = .now, updatedAt: Date = .now) {
         self.id = id
         self.name = name
         self.author = author
@@ -70,6 +71,7 @@ public struct ModRecord: Codable, Identifiable, Equatable, Sendable {
         self.sourceURL = sourceURL
         self.managedFilename = managedFilename
         self.sha256 = sha256
+        self.assetPaths = assetPaths
         self.enabled = enabled
         self.installedAt = installedAt
         self.updatedAt = updatedAt
