@@ -7,7 +7,9 @@ struct GuideView: View {
             Text(LocalizedStringKey(AuthoringGuide.markdown))
                 .textSelection(.enabled)
                 .frame(maxWidth: 760, alignment: .leading)
-                .padding(32)
+                .padding(28)
+                .brandPanel(cornerRadius: 18)
+                .padding(28)
         }.navigationTitle("Authoring Guide")
     }
 }

@@ -6,10 +6,23 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(SidebarItem.allCases, selection: $model.selectedTab) { item in
-                Label(item.rawValue, systemImage: item.icon).tag(item)
+            VStack(spacing: 0) {
+                HStack(spacing: 11) {
+                    BrandLogo(size: 42)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Mac NMS").font(.headline)
+                        Text("Mod Manager").font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .padding(14)
+                Divider().opacity(0.55)
+                List(SidebarItem.allCases, selection: $model.selectedTab) { item in
+                    Label(item.rawValue, systemImage: item.icon).tag(item)
+                }
+                .scrollContentBackground(.hidden)
             }
-            .navigationTitle("NMS Mods")
+            .background(Brand.navy.opacity(0.055))
         } detail: {
             Group {
                 switch model.selectedTab {
@@ -19,6 +32,7 @@ struct ContentView: View {
                 case .settings: SettingsView()
                 }
             }
+            .background(BrandBackdrop())
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button { Task { await model.refresh() } } label: { Label("Refresh", systemImage: "arrow.clockwise") }
@@ -26,6 +40,7 @@ struct ContentView: View {
                 }
             }
         }
+        .tint(Brand.teal)
         .alert("Mac NMS Mod Manager", isPresented: Binding(
             get: { model.errorMessage != nil },
             set: { if !$0 { model.errorMessage = nil } }

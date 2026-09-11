@@ -11,8 +11,11 @@ env CLANG_MODULE_CACHE_PATH="$PROJECT_ROOT/work/module-cache" \
     swift build -c release --scratch-path "$BUILD_ROOT"
 
 mkdir -p "$APP_ROOT/Contents/MacOS"
+mkdir -p "$APP_ROOT/Contents/Resources"
 cp "$BUILD_ROOT/arm64-apple-macosx/release/MacNMSModManager" "$APP_ROOT/Contents/MacOS/MacNMSModManager"
 cp "$PROJECT_ROOT/Resources/Info.plist" "$APP_ROOT/Contents/Info.plist"
+cp "$PROJECT_ROOT/Resources/AppIcon.icns" "$APP_ROOT/Contents/Resources/AppIcon.icns"
+cp "$PROJECT_ROOT/Resources/AppLogo.png" "$APP_ROOT/Contents/Resources/AppLogo.png"
 xattr -cr "$APP_ROOT"
 codesign --force --deep --sign - "$APP_ROOT"
 codesign --verify --deep --strict "$APP_ROOT"

@@ -36,6 +36,7 @@ struct ModsView: View {
                     List(model.mods) { mod in
                         ModRow(mod: mod)
                     }
+                    .scrollContentBackground(.hidden)
                 }
             }
         }

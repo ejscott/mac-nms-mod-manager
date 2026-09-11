@@ -8,7 +8,14 @@ struct DashboardView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Text("Dashboard").font(.largeTitle.bold())
+                HStack(spacing: 18) {
+                    BrandLogo(size: 74)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Ready for the stars").font(.largeTitle.bold())
+                        Text("Patch safely, organize cleanly, and catch mod conflicts before launch.")
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 HStack(spacing: 18) {
                     StatusCard(title: "Game", value: model.installation == nil ? "Not found" : "Found", symbol: "gamecontroller")
                     StatusCard(title: "Mod loader", value: healthLabel, symbol: healthSymbol, tint: healthTint)
@@ -67,11 +74,15 @@ private struct StatusCard: View {
     let symbol: String
     var tint: Color = .accentColor
     var body: some View {
-        GroupBox {
-            HStack(spacing: 14) {
-                Image(systemName: symbol).font(.title).foregroundStyle(tint)
-                VStack(alignment: .leading) { Text(title).foregroundStyle(.secondary); Text(value).font(.title3.bold()) }
-            }.frame(maxWidth: .infinity, alignment: .leading).padding(8)
+        HStack(spacing: 14) {
+            Image(systemName: symbol).font(.title2).foregroundStyle(tint)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.caption).foregroundStyle(.secondary)
+                Text(value).font(.title3.bold())
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .brandPanel()
     }
 }

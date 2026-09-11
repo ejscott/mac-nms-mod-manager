@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Resources/AppLogo.png" width="160" alt="Mac NMS Mod Manager icon">
+</p>
+
 # Mac NMS Mod Manager
 
 Mac NMS Mod Manager patches the Apple Silicon version of No Man's Sky so the game can load mods from its own `MACOSBANKS/MODS` folder. After the patch is enabled, Mac-compatible mods can be installed, enabled, disabled, and removed without changing the game's original asset archives.
