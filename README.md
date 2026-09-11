@@ -15,6 +15,17 @@ The verified prototype mounts `MACOSBANKS/MODS` first and then lets the normal `
 - Conversion-provider boundary for future Windows `.pak` and sparse EXML/MBIN support
 - Unit tests for pattern matching, Mach-O parsing, and registry behavior
 
+## Creating and converting mods
+
+See the [Mac-friendly mod authoring and conversion guide](docs/MOD_AUTHORING.md) for:
+
+- packaging loose assets as a native Mac HGPAK;
+- converting Windows HGPAK or legacy PSARC archives;
+- correctly porting sparse EXML/MBIN mods against current Mac vanilla assets;
+- archive layout, naming, conflict handling, testing, and release checklists.
+
+The manager currently installs completed Mac HGPAK archives. Automatic Windows archive conversion and sparse EXML/MBIN merging are planned; the guide describes the manual workflow and clearly marks the steps that still require external tools.
+
 The first milestone does **not** guess how to patch an unknown game update. A newly updated binary is reported as unsupported until a recipe containing validated original and patched signatures is added.
 
 ## Run
