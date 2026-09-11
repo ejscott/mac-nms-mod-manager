@@ -2,6 +2,12 @@
 
 This catalog records No Man's Sky mods that have been evaluated or converted for the Mac additive mod loader. Its primary purpose is to help users discover compatibility and to make conversions reproducible without taking distribution or credit away from the original creators.
 
+## Current tracker
+
+| Mod | Conversion status | In-game test | Redistribution | Record |
+| --- | --- | --- | --- | --- |
+| [Instant Refiners](https://www.nexusmods.com/nomanssky/mods/2016) | Verified | Passed | Prohibited by source permissions | [JSON](mods/instant-refiners.json) |
+
 ## Publishing policy
 
 The default catalog entry contains metadata, creator credit, a link to the creator's original download page, compatibility results, conflict paths, source hashes, and a conversion recipe. It does **not** contain a mirrored mod archive.

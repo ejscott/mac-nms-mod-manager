@@ -28,9 +28,22 @@ See the [Mac-friendly mod authoring and conversion guide](docs/MOD_AUTHORING.md)
 
 The manager currently installs completed Mac HGPAK archives. Automatic Windows archive conversion and sparse EXML/MBIN merging are planned; the guide describes the manual workflow and clearly marks the steps that still require external tools.
 
-## Converted mod catalog
+## Mod compatibility and convertibility
 
-The [`catalog`](catalog/README.md) records tested conversions, original creator credit, source hashes, affected game paths, conflicts, and redistribution permission. Catalog inclusion does not mean the converted archive may be redistributed: entries remain metadata-and-recipe only unless a creator's license or explicit permission is documented.
+| Mod | Original creators | Source format | Conversion | Mac test | Redistribution | Known conflict |
+| --- | --- | --- | --- | --- | --- | --- |
+| [Instant Refiners](https://www.nexusmods.com/nomanssky/mods/2016) | wim95, NooBzPoWaH, Babscoole, BladehawkeX | AMUMSS Lua + EXML | ✅ Verified convertible | ✅ Passed | ⛔ Do not redistribute | `NMS_REALITY_GCRECIPETABLE.MBIN` |
+
+Status guide:
+
+- ✅ **Verified convertible** — converted, structurally validated, and tested in the Mac game.
+- 🟡 **Convertible** — a conversion path is known but still needs an in-game test.
+- 🔎 **Researching** — the archive or affected assets are still being analyzed.
+- ❌ **Incompatible** — depends on Windows-native code or another feature this loader cannot provide.
+
+The detailed [`catalog`](catalog/README.md) stores creator credits, original download links, source hashes, conversion recipes, affected game paths, test results, conflicts, and redistribution permissions. The machine-readable [Instant Refiners record](catalog/mods/instant-refiners.json) is the first verified entry.
+
+Catalog inclusion never grants permission to mirror a mod. Converted archives are only published when the creator's license or explicit permission allows it; otherwise the catalog links users to the original download and records convertibility only.
 
 The first milestone does **not** guess how to patch an unknown game update. A newly updated binary is reported as unsupported until a recipe containing validated original and patched signatures is added.
 
