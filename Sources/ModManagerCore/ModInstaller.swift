@@ -4,12 +4,14 @@ public enum ModInstallerError: LocalizedError {
     case sourceMissing
     case nameCollision(String)
     case trackedFileMissing(String)
+    case destinationOccupied(String)
 
     public var errorDescription: String? {
         switch self {
         case .sourceMissing: "The selected mod archive no longer exists."
         case .nameCollision(let name): "A different mod already uses \(name)."
         case .trackedFileMissing(let name): "The tracked archive \(name) could not be found."
+        case .destinationOccupied(let name): "Cannot move \(name) because a file with that name already exists at the destination."
         }
     }
 }
@@ -69,14 +71,21 @@ public actor ModInstaller {
         var snapshot = await registry.snapshot()
         guard let index = snapshot.mods.firstIndex(where: { $0.id == id }) else { return }
         let record = snapshot.mods[index]
+        guard record.enabled != enabled else { return }
         let from = (record.enabled ? installation.modsURL : directories.disabledModsURL).appendingPathComponent(record.managedFilename)
         let to = (enabled ? installation.modsURL : directories.disabledModsURL).appendingPathComponent(record.managedFilename)
         guard FileManager.default.fileExists(atPath: from.path) else { throw ModInstallerError.trackedFileMissing(record.managedFilename) }
+        guard !FileManager.default.fileExists(atPath: to.path) else { throw ModInstallerError.destinationOccupied(record.managedFilename) }
         try FileManager.default.createDirectory(at: to.deletingLastPathComponent(), withIntermediateDirectories: true)
         try FileManager.default.moveItem(at: from, to: to)
         snapshot.mods[index].enabled = enabled
         snapshot.mods[index].updatedAt = .now
-        try await registry.replace(with: snapshot)
+        do {
+            try await registry.replace(with: snapshot)
+        } catch {
+            try? FileManager.default.moveItem(at: to, to: from)
+            throw error
+        }
     }
 
     public func uninstall(id: UUID) async throws {
