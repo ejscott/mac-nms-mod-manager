@@ -26,6 +26,10 @@ See the [Mac-friendly mod authoring and conversion guide](docs/MOD_AUTHORING.md)
 
 The manager currently installs completed Mac HGPAK archives. Automatic Windows archive conversion and sparse EXML/MBIN merging are planned; the guide describes the manual workflow and clearly marks the steps that still require external tools.
 
+## Converted mod catalog
+
+The [`catalog`](catalog/README.md) records tested conversions, original creator credit, source hashes, affected game paths, conflicts, and redistribution permission. Catalog inclusion does not mean the converted archive may be redistributed: entries remain metadata-and-recipe only unless a creator's license or explicit permission is documented.
+
 The first milestone does **not** guess how to patch an unknown game update. A newly updated binary is reported as unsupported until a recipe containing validated original and patched signatures is added.
 
 ## Run

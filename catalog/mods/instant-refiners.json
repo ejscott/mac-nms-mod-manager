@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "instant-refiners",
+  "name": "Instant Refiners",
+  "creators": [
+    {
+      "name": "wim95",
+      "role": "Original mod author",
+      "profileURL": null
+    },
+    {
+      "name": "NooBzPoWaH",
+      "role": "Maintainer and Lua author",
+      "profileURL": null
+    },
+    {
+      "name": "Babscoole",
+      "role": "Contributor credited on the original mod page",
+      "profileURL": null
+    },
+    {
+      "name": "BladehawkeX",
+      "role": "EXML patch contributor credited in the supplied documentation",
+      "profileURL": null
+    }
+  ],
+  "source": {
+    "pageURL": "https://www.nexusmods.com/nomanssky/mods/2016",
+    "version": "7.00",
+    "declaredGameVersion": "COSMOS 7.00 / Steam build 25208023",
+    "license": "Nexus page permissions prohibit uploading elsewhere and require permission before modifying files",
+    "files": [
+      {
+        "kind": "AMUMSS Lua",
+        "sha256": "03debc194abb3db9f4a7c33ae1ad436da6bb18ee1542a6d2ded867eb13158f7f"
+      },
+      {
+        "kind": "Generated EXML",
+        "sha256": "3d865a1536887dc6299db17de76ae3efe26124af306d6b2f7e9037f07c7c5135"
+      }
+    ]
+  },
+  "conversion": {
+    "status": "verified",
+    "method": "Extract the current Mac vanilla recipe-table MBIN, decompile it, multiply every TimeToMake value by 0.00001, leave Amount values unchanged, compile with the matching schema, and package the resulting MBIN as Mac HGPAK v2 with LZ4 compression.",
+    "targetPaths": [
+      "METADATA/REALITY/TABLES/NMS_REALITY_GCRECIPETABLE.MBIN"
+    ],
+    "outputSHA256": "b57f7acf46874d6564862ebd5bc41aa3f68f35375e3e47ec0e901de35bc7f5d7",
+    "validatedAt": "2026-09-11",
+    "notes": "Round-trip validation found 1,684 recipes and confirmed that Amount fields were unchanged from the current Mac vanilla table. The converted mod subsequently passed an in-game test."
+  },
+  "redistribution": {
+    "status": "prohibited",
+    "artifactPublished": false,
+    "permissionEvidenceURL": "https://www.nexusmods.com/nomanssky/mods/2016",
+    "artifactURL": null,
+    "notes": "The original Nexus page states that the file may not be uploaded to other sites and that modification requires permission. The successful conversion is recorded for compatibility research only; do not publish the converted archive without new explicit permission from the relevant creators."
+  },
+  "compatibility": {
+    "macInGameTest": true,
+    "testedAt": "2026-09-11",
+    "result": "Successful: the mod loaded through the additive Mac loader and instant refining worked as intended."
+  },
+  "conflicts": [
+    "METADATA/REALITY/TABLES/NMS_REALITY_GCRECIPETABLE.MBIN"
+  ]
+}

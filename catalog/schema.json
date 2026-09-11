@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ejscott/mac-nms-mod-manager/blob/main/catalog/schema.json",
+  "title": "Mac NMS converted mod catalog entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "creators",
+    "source",
+    "conversion",
+    "redistribution",
+    "compatibility",
+    "conflicts"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "creators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "role"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "profileURL": { "type": ["string", "null"], "format": "uri" }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pageURL", "version", "declaredGameVersion", "license", "files"],
+      "properties": {
+        "pageURL": { "type": ["string", "null"], "format": "uri" },
+        "version": { "type": "string" },
+        "declaredGameVersion": { "type": "string" },
+        "license": { "type": ["string", "null"] },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "sha256"],
+            "properties": {
+              "kind": { "type": "string" },
+              "sha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        }
+      }
+    },
+    "conversion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "method", "targetPaths", "outputSHA256", "validatedAt"],
+      "properties": {
+        "status": { "enum": ["researching", "convertible", "verified", "blocked", "incompatible"] },
+        "method": { "type": "string", "minLength": 1 },
+        "targetPaths": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "outputSHA256": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "validatedAt": { "type": ["string", "null"], "format": "date" },
+        "notes": { "type": "string" }
+      }
+    },
+    "redistribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "artifactPublished", "permissionEvidenceURL"],
+      "properties": {
+        "status": { "enum": ["permission_required", "allowed_by_license", "explicit_permission", "author_hosted", "prohibited"] },
+        "artifactPublished": { "type": "boolean" },
+        "permissionEvidenceURL": { "type": ["string", "null"], "format": "uri" },
+        "artifactURL": { "type": ["string", "null"], "format": "uri" },
+        "notes": { "type": "string" }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["macInGameTest", "testedAt", "result"],
+      "properties": {
+        "macInGameTest": { "type": "boolean" },
+        "testedAt": { "type": ["string", "null"], "format": "date" },
+        "result": { "type": "string" }
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}
