@@ -1,8 +1,10 @@
 # Mac NMS Mod Manager
 
-A native macOS mod manager for the Steam version of No Man's Sky. The project is intentionally conservative around executable patching: it fingerprints the universal binary, inspects the ARM64 slice, discovers and validates patch landmarks, creates a restorable backup, applies edits atomically, and verifies code signing.
+Mac NMS Mod Manager patches the Apple Silicon version of No Man's Sky so the game can load mods from its own `MACOSBANKS/MODS` folder. After the patch is enabled, Mac-compatible mods can be installed, enabled, disabled, and removed without changing the game's original asset archives.
 
-The verified prototype mounts `MACOSBANKS/MODS` first and then lets the normal `MACOSBANKS` mount continue. Stock archives are never edited.
+This takes a different approach from [Enki013's nms-mod-installer-macos](https://github.com/Enki013/nms-mod-installer-macos). That project made Mac modding possible by unpacking and rebuilding the stock game archives. This project builds on that inspiration by restoring a separate, native in-game mod folder: mods load first, the normal game files load afterward, and the stock archives stay untouched.
+
+The manager backs up the original executable, handles code signing, detects game updates, and refuses to apply an old patch to an unrecognized game build.
 
 ## Current milestone
 
